@@ -20,24 +20,34 @@ export async function run() {
    */
 
   const running = document.getElementById("run");
-  running.innerText = 'Processing...'
+  running.innerText = 'Analyzing...'
 
   
   const item = Office.context.mailbox.item;
+  console.log(Office.context.mailbox.item.conversationId)
+// id : 
+
 
   
   const emailBody = await new Promise((resolve,reject)=>{
     item.body.getAsync(Office.CoercionType.Text,resolve)
   })
 
+
+
+  let prefix = `Tell me action items in short pointers from below email msg, output ur repose as html: `
+  prefix = ''
   //chatgpt i/p
   let data = JSON.stringify({
-    "text": `Tell me action items in short pointers from below email msg, output ur repose as html: ${emailBody.value}`,
+    "text": `${prefix}${emailBody.value}`,
     "options": {
-      "conversationId": "c_078e7ece0d0d1137"
+      "conversationId": "c_6b93fe555b8cdf01"
     }
   });
+  // generates button: c_2c1d6d164526e4cd
+  // generates pattern: c_449f0295901e0e93
 
+  
   //config
   let config = {
     method: 'post',
@@ -72,12 +82,12 @@ export async function run() {
       return JSON.stringify(error?.response?.data) || error.message
     });
 
-
+      
   let insertAt = document.getElementById("item-subject");
   insertAt.appendChild(document.createElement("br"));
 
   var div = document.createElement('div');
-  div.innerHTML = `<div style='width:250px;'>${gptResponse}</div>`;
+  div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html","").replace("```","")  }</div>`
   insertAt.appendChild(div);
 
   // insertAt.appendChild(document.createElement("br"));
