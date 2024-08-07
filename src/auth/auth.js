@@ -6,32 +6,29 @@ const clientId = 'f595b682-806f-4f31-ad89-32d80caf0221';
 const clientSecret = 'aI48Q~Ax7UrKZUvo3MzOxc~oU3cIIt5dF1mpVan6';
 const scope = 'https://graph.microsoft.com/.default';
 
-async function getAccessToken() {
-    const url = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
-
-    const data = {
-        client_id: clientId,
-        scope: scope,
-        client_secret: clientSecret,
-        grant_type: 'client_credentials'
-    };
-
+ const getAccessToken = async () => {
     try {
-        const response = await axios.post(url, qs.stringify(data), {
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        });
-
-        return response.data.access_token;
+      const response = await axios.post(
+        `https://login.microsoftonline.com/consumers/oauth2/v2.0/token`,
+        querystring.stringify({
+          grant_type: 'client_credentials',
+          client_id: clientId,
+          client_secret: clientSecret,
+          scope: scope
+        }),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      );
+  
+      const { access_token } = response.data;
+      console.log('Access Token:', access_token);
+      return access_token;
     } catch (error) {
-        console.error('Error getting access token:', error);
-        throw error;
+      console.error('Error getting access token:', error.response ? error.response.data : error.message);
     }
-}
-
-getAccessToken().then(token => {
-    console.log('Access Token:', token);
-}).catch(error => {
-    console.error('Error:', error);
-});
+  };
+  
+  getAccessToken();

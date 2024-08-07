@@ -1,3 +1,6 @@
+import { getAccessToken } from "../auth/auth";
+import { getGraphAccessToken, getGraphyToken } from "../auth/graph";
+
 const axios = require("axios");
 /*
  * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
@@ -144,35 +147,49 @@ export async function run2() {
   //   });
 
   // Analyze current email
-
-  let gptResponse = await askAI(data, apiKey);
-  console.log(gptResponse);
+//   const graphAPIAccessToken = await getGraphyToken();
+// console.log(graphAPIAccessToken)
+let gptResponse = ''
+  //   gptResponse = await askAI(data, apiKey);
+  // console.log(gptResponse);
 
   // //get keywords from current email
-  const currentIssueKeywords = await analyzeCurrentEmail(emailBody.value, apiKey);
-  console.log(currentIssueKeywords.keywords);
+  const currentIssueKeywords =  await analyzeCurrentEmail(emailBody.value, apiKey);
+  const ke = await currentIssueKeywords.keywords;
+  const su = await currentIssueKeywords.summary;
+  console.log(ke);
+  
 
-  let allSearchResults = [];
 
-  const keywords = Object.keys(currentIssueKeywords.keywords);
+let graphAPIAccessToken = await getGraphyToken();
+
+  const keywords = Object.keys(ke);
   console.log(keywords)
 
-  for (const keyword of keywords) {
-    try {
-      const searchResult = await searchBox(keyword); // Await the result from searchBox
-      allSearchResults.push(...searchResult); // Append the results to the array
-    } catch (error) {
-      console.error(`Failed to search for keyword "${keyword}":`, error); // Handle any errors
+  let allSearchResults = await Promise.all(keywords.map((keyword)=>{
+    return searchEmails(graphAPIAccessToken,[keyword]).catch(e=>{
+      console.log("tolerable Error reading mails api",e)
+      return []
+  })
+  })).then(results=>{
+    let good = results.flat().filter(o=>o?.id != undefined)
+    console.log('results.flat()',good)
+    const map = new Map()
+    for(let i =0;i<good.length;i++){
+      map.set(good[i].id, good[i])
     }
-  }
+    console.log('map.len',map.size)
+    return Array.from(map.values());
+})
 
-  // Process the aggregated results to find the most relevant ones
-  // You might want to implement your own logic for determining similarity
+  // const searchResult = await searchEmails(graphAPIAccessToken,combineKeywords); 
+  // // Process the aggregated results to find the most relevant ones
+  // // You might want to implement your own logic for determining similarity
   console.log(allSearchResults);
 
   //find similar search
-  const similarIssue = await searchBox(currentIssueKeywords);
-  console.log(similarIssue);
+  // const similarIssue = await searchBox(currentIssueKeywords);
+  // console.log(similarIssue);
 
   let insertAt = document.getElementById("item-subject");
   insertAt.appendChild(document.createElement("br"));
@@ -181,6 +198,14 @@ export async function run2() {
   // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
   div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html", "").replace("```", "")}</div>`;
   insertAt.appendChild(div);
+
+
+  
+  var div2 = document.createElement("div");
+  // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
+  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map(mail=>`<li>${mail.subject}</li>`).join("<br/>") }</ul>`;
+  insertAt.appendChild(div2);
+
 
   running.innerText = "";
 }
@@ -281,34 +306,97 @@ export async function run() {
 }
 
 
-async function searchBox(query) {
-  const searchEmails = (query) => {
-    return new Promise((resolve, reject) => {
-      Office.context.mailbox.searchEmails(query, (result) => {
-        if (result.status === Office.AsyncResultStatus.Succeeded) {
-          console.log(result);
-          console.log(`Search result for query "${query}":`, result.value);
-          resolve(result.value);
-        } else {
-          reject(result.error);
-        }
-      });
-    });
-  };
+// async function searchBox(query) {
+//   const searchEmails = (query) => {
+//     return new Promise((resolve, reject) => {
+//       Office.context.mailbox.searchEmails(query, (result) => {
+//         if (result.status === Office.AsyncResultStatus.Succeeded) {
+//           console.log(result);
+//           console.log(`Search result for query "${query}":`, result.value);
+//           resolve(result.value);
+//         } else {
+//           reject(result.error);
+//         }
+//       });
+//     });
+//   };
 
-  return await searchEmails(query);
+//   return await searchEmails(query);
+// }
+
+//search graphAPI
+async function searchEmails(accessToken, searchQueryArr) {
+  let query = searchQueryArr.map(kw=>{
+    return `((subject:${kw}) OR (body:${kw}))`
+  }).join(' OR ')
+  console.log('searchQueryArr',query)
+
+
+  
+  let config = {
+    method: 'get',
+    maxBodyLength: Infinity,
+    url: `https://graph.microsoft.com/v1.0/me/messages?$search=%22${encodeURIComponent(query)}%22`,
+    headers: { 
+      'accept': '*/*', 
+      'accept-language': 'en-US,en;q=0.9,mr;q=0.8,kn;q=0.7', 
+      'authorization': `Bearer ${accessToken}`, 
+      'cache-control': 'no-cache', 
+      'client-request-id': '54e3ac7c-859b-4a2a-eb11-a2631e7232c8', 
+      'origin': 'https://developer.microsoft.com', 
+      'pragma': 'no-cache', 
+      'prefer': 'ms-graph-dev-mode', 
+      'priority': 'u=1, i', 
+      'referer': 'https://developer.microsoft.com/', 
+      'sdkversion': 'GraphExplorer/4.0, graph-js/3.0.7 (featureUsage=6)', 
+      'sec-ch-ua': '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"', 
+      'sec-ch-ua-mobile': '?0', 
+      'sec-ch-ua-platform': '"Windows"', 
+      'sec-fetch-dest': 'empty', 
+      'sec-fetch-mode': 'cors', 
+      'sec-fetch-site': 'same-site', 
+      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
+    }
+  };
+  
+  return axios.request(config)
+  .then((response) => {
+    console.log('graph.microsoft.com',response.data.value);
+    return response.data.value.map(v=> {return {searchQueryArr,id: v.id, subject: v.subject, body: v.body.content}})
+  })
+  .catch((error) => {
+    console.log('graph.microsoft.com',error);
+    return undefined
+  });
+  
+  // console.log(searchQuery);
+  // const searchQueryA="issue with settlement of order";
+  // try {
+  //   const response = await axios.get(
+  //     `https://graph.microsoft.com/v1.0/me/messages?$filter=contains(subject,'${searchQuery}')`,
+  //     {
+  //       headers: {
+  //         Authorization: `Bearer ${accessToken}`,
+  //         'Content-Type': 'application/json',
+  //       },
+  //     }
+  //   );
+  //   console.log(response.data.value);
+  //   return response.data.value; // Returns the list of messages
+  // } catch (error) {
+  //   console.error('Error searching emails:', error);
+  //   throw error;
+  // }
 }
 
-//extract keywords
 async function analyzeCurrentEmail(emailBody, apiKey) {
-  // Simulated function that processes the email body and extracts keywords
   const data = {
     contents: [
       {
         role: "user",
         parts: [
           {
-            text: `Extract keywords from the following email content:\n${emailBody}`,
+            text: `Extract keywords and summarize the following email content:\n${emailBody}`,
           },
         ],
       },
@@ -317,7 +405,7 @@ async function analyzeCurrentEmail(emailBody, apiKey) {
       role: "user",
       parts: [
         {
-          text: "Extract and return 5 most important keywords or phrases from the email.",
+          text: "Extract and return the 5 most important keywords or phrases and a summary of the email.",
         },
       ],
     },
@@ -333,37 +421,27 @@ async function analyzeCurrentEmail(emailBody, apiKey) {
     }
   );
 
-  const keywords = response.data.candidates[0].content.parts[0].text.split("\n").filter((line) => line.trim() !== "");
-  // const keywords = response.data.candidates[0].content.parts[0].text
-  //   .split("\n")
-  //   .filter((line) => line.trim() !== "")
-  //   .map((keyword) => keyword.trim())
-  //   .join(" ");
-
+  const parts = response.data.candidates[0].content.parts;
+  const text = parts[0].text;
+  const keywordSection = text.split("## Summary:")[0].trim();
+  const summarySection = text.split("## Summary:")[1].trim();
+  // console.log(parts)
+  // const keywords = parts[0].text.split("\n").filter((line) => line.trim() !== "");
+  // const summary = parts[1].text;
+  console.log(keywordSection);
+  console.log(summarySection);
   return {
-    keywords: keywords,
-    summary: "Summary of current issue extracted here", // Add summary extraction as needed
+    keywords: extractKeywords(keywordSection),
+    summary: summarySection,
   };
-
-  // return {
-  //   keywords: keywords.split(" "), // Return as an array if needed for other purposes
-  //   query: keywords,
-  //   summary: "Summary of current issue extracted here", // Add summary extraction as needed
-  // };
 }
 
-// async function gatherSearchResults(currentIssueKeywords) {
-//   let allSearchResults = [];
 
-//   const keyswords = Object.keys(currentIssueKeywords.keywords);
+async function extractKeywords(text) {
+  return text.split("\n").reduce((acc, line) => {
+    const keyword = line.trim();
+    if (keyword) acc[keyword] = true;
+    return acc;
+  }, {});
+}
 
-//   for (const keyword of keywords) {
-//     try {
-//       const searchResult = await searchBox(keyword); // Await the result from searchBox
-//       allSearchResults.push(...searchResult); // Append the results to the array
-//     } catch (error) {
-//       console.error(`Failed to search for keyword "${keyword}":`, error); // Handle any errors
-//     }
-//   }
-//   return allSearchResults; // Return the accumulated results
-// }
