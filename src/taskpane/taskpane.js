@@ -17,11 +17,24 @@ Office.onReady((info) => {
   }
 });
 
+
+
 export async function run2() {
   const running = document.getElementById("run");
   running.innerText = "Analyzing...";
+
+  
+  const timerDisplay = document.getElementById("timer");
+  let startTime = Date.now();
+   // Update timer every second
+   let timerInterval = setInterval(() => {
+    const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
+    timerDisplay.innerText = `Elapsed: ${elapsedTime}s`;
+  }, 10);
+
+
   const item = Office.context.mailbox.item;
-  console.log(Office.context.mailbox.item.conversationId);
+  // console.log(Office.context.mailbox.item.conversationId);
   // id :
 
   const emailBody = await new Promise((resolve, reject) => {
@@ -115,6 +128,22 @@ export async function run2() {
         {
           text: '1.summarize email in bullet points in plain html and show action items in form of buy/sell button, do not repeat it in summary as well  in plain html ONLY\nafter writing summary of email in bullet points ,improve the button quality , add more animation to look more attractive\nsummarize in bullet points the action expected from sender of email which should include descriptive action, then show all the buttons(as per previous instructions)\n \n2. create html action buttons in plain html where buy action should be in green colour and sell action should be in red colour\ncreate a purple colour "Schedule Meeting" button similar to buy and sell , also mention the name of the person in meeting button who has requested for meeting\ngenerated html button has button text which says quantity and price with buy or sell action\n3.onclick "buy" should redrect to /buy API and sell to /sell API and schedule meeting buttoin onclick should redirect to /meeting API. \n4.the ouput can contain plain html to show texts and CSS properties can only be used to create and show buttons (colour as per previous instructions ONLY)\n5. Highlight date , any id like #1234 ,price ,quantity in blue colour\n6. when there is mail chain, mention about each mail in summary points in the order of occurance of the mail and its information provided.',
         },
+        {
+          text:'Look for AGREEMENT OR DISAGREEMENT FROM ANY PARTY AND MENTION IN THE OUTPUT\n If AGREED : Show "settled"\n If NOT AGREED : show "Not Settled"'
+        },
+        {
+          text:'If AGREED or SETTLED : show a action button with above instructions'
+        },
+        {
+          text:'If NOT AGREED : show "NOT SETTLED" with grey button' 
+        },
+        {
+          text:'IT IS MANDATORY TO SHOW FINAL RESPONSE ON AGREEMENT FROM CLIENT IF AVAILABLE' 
+        },
+        {
+          text:'IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules. Understood?'
+        }
+        
       ],
     },
     generationConfig: {
@@ -147,49 +176,52 @@ export async function run2() {
   //   });
 
   // Analyze current email
-//   const graphAPIAccessToken = await getGraphyToken();
-// console.log(graphAPIAccessToken)
-let gptResponse = ''
-  //   gptResponse = await askAI(data, apiKey);
+  //   const graphAPIAccessToken = await getGraphyToken();
+  // console.log(graphAPIAccessToken)
+
+  const gptResponse = await askAI(data, apiKey);
   // console.log(gptResponse);
 
-  // //get keywords from current email
-  const currentIssueKeywords =  await analyzeCurrentEmail(emailBody.value, apiKey);
+  // //get keywords and summary from current email
+  const currentIssueKeywords = await analyzeCurrentEmail(emailBody.value, apiKey);
   const ke = await currentIssueKeywords.keywords;
   const su = await currentIssueKeywords.summary;
-  console.log(ke);
-  
+  // console.log(ke);
 
 
-let graphAPIAccessToken = await getGraphyToken();
+  //get access token to cll ms grph api
+  let graphAPIAccessToken = await getGraphyToken();
 
   const keywords = Object.keys(ke);
-  console.log(keywords)
+  console.log(keywords);
 
-  let allSearchResults = await Promise.all(keywords.map((keyword)=>{
-    return searchEmails(graphAPIAccessToken,[keyword]).catch(e=>{
-      console.log("tolerable Error reading mails api",e)
-      return []
-  })
-  })).then(results=>{
-    let good = results.flat().filter(o=>o?.id != undefined)
-    console.log('results.flat()',good)
-    const map = new Map()
-    for(let i =0;i<good.length;i++){
-      map.set(good[i].id, good[i])
+  let allSearchResults = await Promise.all(
+    keywords.map((keyword) => {
+      return searchEmails(graphAPIAccessToken, [keyword]).catch((e) => {
+        console.log("tolerable Error reading mails api", e);
+        return [];
+      });
+    })
+  ).then((results) => {
+    let good = results.flat().filter((o) => o?.id != undefined);
+    console.log("results.flat()", good);
+    const map = new Map();
+    for (let i = 0; i < good.length; i++) {
+      map.set(good[i].id, good[i]);
     }
-    console.log('map.len',map.size)
+    console.log("map.len", map.size);
     return Array.from(map.values());
-})
+  });
 
-  // const searchResult = await searchEmails(graphAPIAccessToken,combineKeywords); 
+  // const searchResult = await searchEmails(graphAPIAccessToken,combineKeywords);
   // // Process the aggregated results to find the most relevant ones
-  // // You might want to implement your own logic for determining similarity
+
   console.log(allSearchResults);
 
   //find similar search
   // const similarIssue = await searchBox(currentIssueKeywords);
   // console.log(similarIssue);
+
 
   let insertAt = document.getElementById("item-subject");
   insertAt.appendChild(document.createElement("br"));
@@ -200,13 +232,12 @@ let graphAPIAccessToken = await getGraphyToken();
   insertAt.appendChild(div);
 
 
-  
   var div2 = document.createElement("div");
   // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
-  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map(mail=>`<li>${mail.subject}</li>`).join("<br/>") }</ul>`;
+  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map(mail=>`<li>${mail.subject}</li>`).join("<br/>") }</ul>`;  
   insertAt.appendChild(div2);
-
-
+  
+clearInterval(timerInterval);
   running.innerText = "";
 }
 
@@ -298,13 +329,16 @@ export async function run() {
   let insertAt = document.getElementById("item-subject");
   insertAt.appendChild(document.createElement("br"));
 
+  
+
   var div = document.createElement("div");
   div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html", "").replace("```", "")}</div>`;
   insertAt.appendChild(div);
 
+clearInterval(timerInterval);
+
   running.innerText = "";
 }
-
 
 // async function searchBox(query) {
 //   const searchEmails = (query) => {
@@ -325,50 +359,56 @@ export async function run() {
 // }
 
 //search graphAPI
+
+
 async function searchEmails(accessToken, searchQueryArr) {
-  let query = searchQueryArr.map(kw=>{
-    return `((subject:${kw}) OR (body:${kw}))`
-  }).join(' OR ')
-  console.log('searchQueryArr',query)
+  let query = searchQueryArr
+    .map((kw) => {
+      return `((subject:${kw}) OR (body:${kw}))`;
+    })
+    .join(" OR ");
+  console.log("searchQueryArr", query);
 
-
-  
   let config = {
-    method: 'get',
+    method: "get",
     maxBodyLength: Infinity,
     url: `https://graph.microsoft.com/v1.0/me/messages?$search=%22${encodeURIComponent(query)}%22`,
-    headers: { 
-      'accept': '*/*', 
-      'accept-language': 'en-US,en;q=0.9,mr;q=0.8,kn;q=0.7', 
-      'authorization': `Bearer ${accessToken}`, 
-      'cache-control': 'no-cache', 
-      'client-request-id': '54e3ac7c-859b-4a2a-eb11-a2631e7232c8', 
-      'origin': 'https://developer.microsoft.com', 
-      'pragma': 'no-cache', 
-      'prefer': 'ms-graph-dev-mode', 
-      'priority': 'u=1, i', 
-      'referer': 'https://developer.microsoft.com/', 
-      'sdkversion': 'GraphExplorer/4.0, graph-js/3.0.7 (featureUsage=6)', 
-      'sec-ch-ua': '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"', 
-      'sec-ch-ua-mobile': '?0', 
-      'sec-ch-ua-platform': '"Windows"', 
-      'sec-fetch-dest': 'empty', 
-      'sec-fetch-mode': 'cors', 
-      'sec-fetch-site': 'same-site', 
-      'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36'
-    }
+    headers: {
+      accept: "*/*",
+      "accept-language": "en-US,en;q=0.9,mr;q=0.8,kn;q=0.7",
+      authorization: `Bearer ${accessToken}`,
+      "cache-control": "no-cache",
+      "client-request-id": "54e3ac7c-859b-4a2a-eb11-a2631e7232c8",
+      origin: "https://developer.microsoft.com",
+      pragma: "no-cache",
+      prefer: "ms-graph-dev-mode",
+      priority: "u=1, i",
+      referer: "https://developer.microsoft.com/",
+      sdkversion: "GraphExplorer/4.0, graph-js/3.0.7 (featureUsage=6)",
+      "sec-ch-ua": '"Not)A;Brand";v="99", "Google Chrome";v="127", "Chromium";v="127"',
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": '"Windows"',
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-site",
+      "user-agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
+    },
   };
-  
-  return axios.request(config)
-  .then((response) => {
-    console.log('graph.microsoft.com',response.data.value);
-    return response.data.value.map(v=> {return {searchQueryArr,id: v.id, subject: v.subject, body: v.body.content}})
-  })
-  .catch((error) => {
-    console.log('graph.microsoft.com',error);
-    return undefined
-  });
-  
+
+  return axios
+    .request(config)
+    .then((response) => {
+      console.log("graph.microsoft.com", response.data.value);
+      return response.data.value.map((v) => {
+        return { searchQueryArr, id: v.id, subject: v.subject, body: v.body.content };
+      });
+    })
+    .catch((error) => {
+      console.log("graph.microsoft.com", error);
+      return undefined;
+    });
+
   // console.log(searchQuery);
   // const searchQueryA="issue with settlement of order";
   // try {
@@ -435,7 +475,6 @@ async function analyzeCurrentEmail(emailBody, apiKey) {
     summary: summarySection,
   };
 }
-
 
 async function extractKeywords(text) {
   return text.split("\n").reduce((acc, line) => {

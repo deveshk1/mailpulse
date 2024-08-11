@@ -19,6 +19,7 @@ function action(event) {
     message: "Performed action.",
     icon: "Icon.80x80",
     persistent: true,
+    url:"www.google.com"
   };
 
   // Show a notification message.

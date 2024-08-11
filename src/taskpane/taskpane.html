@@ -29,26 +29,31 @@
         <h2 class="ms-font-xl">Please <a target="_blank" href="https://learn.microsoft.com/office/dev/add-ins/testing/test-debug-office-add-ins#sideload-an-office-add-in-for-testing">sideload</a> your add-in to see app body.</h2>
     </section>
     <main id="app-body" class="ms-welcome__main" style="display: none;">
-        <h2 class="ms-font-xl"> Discover what our new SocGen office Ad-in can do for you! </h2>
+        <h2 class="ms-font-xl"> Try out Smart AI Mail Assistant ! </h2>
         <ul class="ms-List ms-welcome__features">
             <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Ribbon ms-font-xl"></i>
-                <span class="ms-font-m">Achieve more with MailPulse</span>
+                <i class="ms-Icon ms-Icon--TimePicker ms-font-xl"></i>
+                <span class="ms-font-m">Now Historical info in few easy points</span>
             </li>
             <li class="ms-ListItem">
-                <i class="ms-Icon ms-Icon--Unlock ms-font-xl"></i>
-                <span class="ms-font-m">It will summarize emails for you</span>
+                <i class="ms-Icon ms-Icon--FastForward ms-font-xl"></i>
+                <span class="ms-font-m">Quick One Click Actions</span>
             </li>
             <li class="ms-ListItem">
                 <i class="ms-Icon ms-Icon--Design ms-font-xl"></i>
-                <span class="ms-font-m">One click actions based on Email</span>
+                <span class="ms-font-m">One click actions based on analysis</span>
             </li>
         </ul>
         <p class="ms-font-l">Click <b>Analyze</b> to see the actions</p>
+     
         <div role="button" id="run" class="ms-welcome__action ms-Button ms-Button--hero ms-font-xl">
-            <span class="ms-Button-label">Analyze</span>
+            <span class="ms-Button-label">Analyze</span>            
         </div>
+        <div id="timer">Timer: 0.0 s</div>
+        <div id="output"></div>
         <p><label id="item-subject"></label></p>
+      
+        
     </main>
 </body>
 
