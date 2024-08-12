@@ -29,7 +29,7 @@ export async function run2() {
    // Update timer every second
    let timerInterval = setInterval(() => {
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-    timerDisplay.innerText = `Elapsed: ${elapsedTime}s`;
+    timerDisplay.innerText = `You Waited : ${elapsedTime}s`;
   }, 10);
 
 
@@ -141,7 +141,7 @@ export async function run2() {
           text:'IT IS MANDATORY TO SHOW FINAL RESPONSE ON AGREEMENT FROM CLIENT IF AVAILABLE' 
         },
         {
-          text:'IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules. Understood?'
+          text:'IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules.'
         }
         
       ],
