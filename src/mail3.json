@@ -1,0 +1,18 @@
+{
+  "data": [
+    {
+      "Currency": "USD"
+    },
+    {
+      "Currency": ""
+    },
+    {
+      "Currency": "Currency"
+    },
+    {
+      "Currency": "USD"
+    }
+  ],
+  "subtotals": [],
+  "totalToBePaid": null
+}

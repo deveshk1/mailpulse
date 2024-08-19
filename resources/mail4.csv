@@ -1,0 +1,8 @@
+SG Ref No,Buy/Sell,Trade Date,Flow Type,Quantity,Ric,Start Date,End Date,Payment Date,Initial Price,Final Price,Currency,FX Rate Reference,Initial FX Rate,Final FX Rate,Reference Rate,Rate Value,Spread,NB Days,Time Basis,Flow Amount,"Payment
+ Currency"
+XY-911223344,Sell,18-Apr-24,Performance,166.6,0011.YY,18-Apr-24,18-Jul-24,22-Jul-24,26.868.6000,40.880.000,CNH,CNH | USD,.137.950062,.137.562935,,,,,,-319388.86,USD
+XY-911223344,Sell,18-Apr-24,Interest,,0011.YY,22-Apr-24,22-Jul-24,22-Jul-24,26.868.6000,,CNH,CNH | USD,.137.950062,,USD-SO-1X,0.53.0,.010.0,91,360,6750.510.00,USD
+,,,,,,,,,,,,,,,,,,,,,
+,,,,,,,,,,,,,,,,,,,Subtotal Performance,-319388.86,USD
+,,,,,,,,,,,,,,,,,,,Subtotal Interest,3750.51,USD
+USD Total to be paid value,,,,,,,,22-Jul-24,,,,,,,,,,,,-312638.35,

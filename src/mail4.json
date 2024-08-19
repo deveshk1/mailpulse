@@ -1,0 +1,69 @@
+{
+  "data": [
+    {
+      "SG Ref No": "XY-911223344",
+      "Buy/Sell": "Sell",
+      "Trade Date": "18-Apr-24",
+      "Flow Type": "Performance",
+      "Quantity": "166.6",
+      "Ric": "0011.YY",
+      "Start Date": "18-Apr-24",
+      "End Date": "18-Jul-24",
+      "Payment Date": "22-Jul-24",
+      "Initial Price": "26.868.6000",
+      "Final Price": "40.880.000",
+      "Currency": "CNH",
+      "FX Rate Reference": "CNH | USD",
+      "Initial FX Rate": ".137.950062",
+      "Final FX Rate": ".137.562935",
+      "Reference Rate": "",
+      "Rate Value": "",
+      "Spread": "",
+      "NB Days": "",
+      "Time Basis": "",
+      "Flow Amount": "-319388.86",
+      "Payment Currency": "USD"
+    },
+    {
+      "SG Ref No": "XY-911223344",
+      "Buy/Sell": "Sell",
+      "Trade Date": "18-Apr-24",
+      "Flow Type": "Interest",
+      "Quantity": "",
+      "Ric": "0011.YY",
+      "Start Date": "22-Apr-24",
+      "End Date": "22-Jul-24",
+      "Payment Date": "22-Jul-24",
+      "Initial Price": "26.868.6000",
+      "Final Price": "",
+      "Currency": "CNH",
+      "FX Rate Reference": "CNH | USD",
+      "Initial FX Rate": ".137.950062",
+      "Final FX Rate": "",
+      "Reference Rate": "USD-SO-1X",
+      "Rate Value": "0.53.0",
+      "Spread": ".010.0",
+      "NB Days": "91",
+      "Time Basis": "360",
+      "Flow Amount": "6750.510.00",
+      "Payment Currency": "USD"
+    }
+  ],
+  "subtotals": [
+    {
+      "type": "Performance",
+      "amount": "-319388.86",
+      "currency": "USD"
+    },
+    {
+      "type": "Interest",
+      "amount": "3750.51",
+      "currency": "USD"
+    }
+  ],
+  "totalToBePaid": {
+    "amount": "-312638.35",
+    "currency": "",
+    "paymentDate": "22-Jul-24"
+  }
+}

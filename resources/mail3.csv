@@ -1,0 +1,10 @@
+Period Start,Period End,Book,Stock,Currency,Trading Unit,"Pay Or 
+Receive",# of Shares,Fixing Date,Start Stock Ccy Proce,End Stock Ccy Price,Start Fx Rate,End Fx Rate,Start Swap Ccy Price,End Swap Ccy Price,Swap Ccy Notional,Payment,Payment Reason,
+18-Apr-24,18-Jul-24,"NOT 
+FOUND",,USD,1,Receive,166600,,26.868419,40.95,7.249,7.2678,3.7065,5.634442,,321195.19,Equity Performance Expiry,
+,,,,,,,,,,,,,,,,Receive 321195.19,,
+,,,,,,,,,,,,,,,,,,
+Period Start,Period End,Book,Stock,Currency,Trading Unit,"Pay Or 
+Receive",Fixing Date,Frequency,Rate Option,# of Days,Basis,Quoted Rate,Spread,Equity Price,# of Shares,Swap Ccy Notional,Payment,Payment Reason
+22-Apr-24,22-Jul-24,"NOT 
+FOUND",,USD,1,Pay,22-Apr-24,O/N,USD-SOFR,91,Actual_360,5.32472527,-100,26.868419,166600,617502.900000,6750.51,Interest Performance Expiry
