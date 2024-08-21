@@ -1,9 +1,9 @@
 import { HtmlLogger } from "./logging";
 
 export const OfficeUtils = {
-  async getCurrentEmailSender(){
+  async getCurrentEmailSender() {
     const item = Office.context.mailbox.item;
-     return item.from.emailAddress
+    return item.from.emailAddress;
   },
   async getCurrentEmailAsHtmlString() {
     const item = Office.context.mailbox.item;
@@ -54,29 +54,18 @@ export class EmailCleaner {
 
   extractEmailDetails(emailHtml) {
     const emailDetails = {};
-
-    // Regex to match any email address using the "@" symbol as a key indicator
     const emailRegex = /[^<@]+@[^<]+/g;
-
-    // Extract all email addresses from the HTML
     const emailMatches = emailHtml.match(emailRegex);
-
-    if (emailMatches && emailMatches.length >= 2) {
-      // First match is 'From', second match is 'To'
-      emailDetails.from = emailMatches[0].trim();
-      emailDetails.to = emailMatches[1].trim();
-    } else if (emailMatches && emailMatches.length >= 1) {
-      // First match is 'From', second match is 'To'
-      emailDetails.from = emailMatches[0].trim();
+    if (emailMatches && emailMatches.length >= 1) {
+      emailDetails.party = emailMatches[0].trim();
     } else {
-      emailDetails.from = "";
-      emailDetails.to = "";
+      emailDetails.party = "";
     }
-
-    // Store the full email HTML
     emailDetails.emailHtml = emailHtml.trim();
-    HtmlLogger.log(emailDetails.to || "0", 1);
-
+    if (emailDetails.party) {
+      const fromSplit = emailDetails.party.split(">");
+      emailDetails.party = fromSplit[fromSplit.length - 1];
+    }
     return emailDetails;
   }
 }

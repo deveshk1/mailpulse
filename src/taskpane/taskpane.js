@@ -16,14 +16,12 @@ Office.onReady((info) => {
 
 export async function init() {
   const currentEmailSender = await OfficeUtils.getCurrentEmailSender()
-  const currentEmailStr = `<b>From:</b> NY Bank &lt;<a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
+  const currentEmailStr = `<b>From:</b><a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
   const ragHelper = new EmailCleaner();
   
   const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
-  // HtmlLogger.log(cleanedHtml);
-
-  // HtmlLogger.log(JSON.stringify(emailsArr, null, 2));
+  HtmlLogger.log(JSON.stringify(emailsArr, null, 2));
 }
 
 export async function run2() {
