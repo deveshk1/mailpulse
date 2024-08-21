@@ -44,7 +44,7 @@ export function extractAgreedValue(emailThreadArr){
 }
 
 export function checkIsAgreement(emailThreadArr = []){ // [{ party, emailHtml }]
-    const ascEmailArr = emailThreadArr.reverse()
+    const ascEmailArr = [...emailThreadArr].reverse()
     const contents = ascEmailArr.map(email=>{
         return {
             role: "user",

@@ -9,7 +9,7 @@ export function checkForMismatches(clientData, sorData){
                 role: "user",
                 parts: [
                   {
-                    text: `Client Data:  ${JSON.stringify(clientData)}`,
+                    text: `THE DATA FROM CLIENT IS:  ${JSON.stringify(clientData)}`,
                   },
                 ],
               },
@@ -17,7 +17,15 @@ export function checkForMismatches(clientData, sorData){
                 role: "user",
                 parts: [
                   {
-                    text: `My SOR Data:  ${JSON.stringify(sorData)}`,
+                    text: `THE DATA FROM MY SOR IS:  ${JSON.stringify(sorData)}`,
+                  },
+                ],
+              },
+              {
+                role: "user",
+                parts: [
+                  {
+                    text: `Compare the client data vs sor data and provide the mismatches in the required format`,
                   },
                 ],
               }
