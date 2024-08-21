@@ -1,6 +1,8 @@
 import { getAccessToken } from "../auth/auth";
 import { getGraphAccessToken, getGraphyToken } from "../auth/graph";
 import { minHtml, parseTable, findMismatches, filterNonGmailEmails, processEmailChain } from "../util/utili";
+import { checkIsAgreement } from "./agreement";
+import { LLMApi } from "./common/llm";
 import { HtmlLogger } from "./common/logging";
 import { EmailCleaner, OfficeUtils } from "./common/office";
 
@@ -10,18 +12,66 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("run").onclick = init;
+    var isRun = false
+    function onClick(){
+      if(isRun){
+        return
+      }
+      isRun = true
+      init().finally(()=>{
+        isRun = false
+      })
+    }
+    document.getElementById("run").onclick = onClick;
   }
 });
 
 export async function init() {
-  const currentEmailSender = await OfficeUtils.getCurrentEmailSender()
-  const currentEmailStr = `<b>From:</b><a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
+  HtmlLogger.startTimer();
+
+  const currentEmailSender = await OfficeUtils.getCurrentEmailSender();
+  const currentEmailStr =
+    `<b>From:</b><a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
   const ragHelper = new EmailCleaner();
-  
+
   const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
-  HtmlLogger.log(JSON.stringify(emailsArr, null, 2));
+  HtmlLogger.setStatus("Analyzing e-mail thread for agreement...");
+  const [agreementResponse, summary] = await Promise.all([
+    checkIsAgreement(emailsArr),
+    LLMApi.summarizeThread(emailsArr),
+  ]);
+
+  const AGREEMENT = "SG and Client both are in mutual agreement";
+  const NON_AGREEMENT = "SG and Client both are not agreement";
+  HtmlLogger.setOutput(HtmlLogger.okHead(AGREEMENT));
+  if (!agreementResponse.includes("not_agreed")) {
+    let outputHtml = `
+      <p>
+      <h4>Summary:</h4>
+      ${summary}
+      </p>
+      ${HtmlLogger.okHead(AGREEMENT)}
+      <h4>Actions:</h4>
+        <button style='background-color:green;color:white;padding:10px;border-radius:10px;width:100%'>Settle</button>
+      </p>
+    `;
+    HtmlLogger.setOutput(outputHtml);
+  } else {
+    let outputHtml = `
+    <p>
+    <h4>Summary:</h4>
+    ${summary}
+    </p>
+    ${HtmlLogger.notOkHead(NON_AGREEMENT)}
+    <h4>Conflicts:</h4>
+
+    </p>
+  `;
+    HtmlLogger.setOutput(outputHtml);
+  }
+  HtmlLogger.setStatus("");
+  HtmlLogger.stopTimer();
 }
 
 export async function run2() {
