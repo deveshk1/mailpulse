@@ -21,13 +21,13 @@ export function checkIsAgreement(emailThreadArr = []){ // [{ party, emailHtml }]
               text: 'Act as a worlds best email reviwer',
             },
             {
-              text: 'I want you to go through the email trail provided in ascending order and Look for DISAGREEMENT from ANY PARTY',
+              text: 'I want you to go through the email trail provided in ascending order and Look for mutual AGREEMENT OR DISAGREEMENT',
             },
             {
-              text: "YOU MUST GIVE YOUR OUTPUT IN one word format. YOUR RESPONSE should be either 'not_agreed' and nothing else",
+              text: 'Mutual AGREEMENT can only be there if there are NO conflicts/mismatches/disagreements or both parties come to a mutual agreement on all data',
             },
             {
-              text: 'IF EITHER OF THE PARTIES are NOT IN AGREEMENT or there are any conflicts/mismatches/disagreements AT ALL, then you must return not_agreed',
+              text: "YOU MUST GIVE YOUR OUTPUT IN one word format. YOUR RESPONSE should be either 'agreed' or 'not_agreed' and nothing else",
             }
           ],
         },

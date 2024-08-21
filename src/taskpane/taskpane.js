@@ -53,7 +53,7 @@ export async function init() {
       </p>
       ${HtmlLogger.okHead(AGREEMENT)}
       <h4>Actions:</h4>
-        <button style='background-color:green;color:white;padding:10px;border-radius:10px;width:100%'>Settle</button>
+        <button onClick='window.open("/assets/pay.html");' style='background-color:green;color:white;padding:10px;border-radius:10px;width:100%'>Settle</button>
       </p>
     `;
     HtmlLogger.setOutput(outputHtml);
