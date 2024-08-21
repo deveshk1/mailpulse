@@ -14,7 +14,7 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
-            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background: linear-gradient(135deg, #bfd5ff, #c7c7c7);
             color: #fff;
         }
         .container {
@@ -40,7 +40,7 @@
             padding: 12px 24px;
             font-size: 16px;
             color: #fff;
-            background-color: #ff5722;
+            background-color: #156920;
             border: none;
             border-radius: 8px;
             cursor: pointer;
@@ -58,8 +58,21 @@
 <body>
     <div class="container">
         <img src="https://localhost:3000/assets/sglogo.png" alt="Logo" class="logo">
-        <div class="amount">Amount: $100.00</div>
+        <div id="amount" class="amount">Amount: 0.00</div>
         <button class="pay-button">Pay Now</button>
     </div>
+    <script>
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        window.onload = function() {
+            const agreedValue = getQueryParam('agreedValue');
+            if (agreedValue) {
+                document.getElementById('amount').innerText = `Amount: ${parseFloat(agreedValue).toFixed(2)}`;
+            }
+        };
+    </script>
 </body>
 </html>

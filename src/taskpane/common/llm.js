@@ -5,7 +5,7 @@ const apiKey = "AIzaSyDMpSIwNqmU3XmYcrl3RsRqQkOAVgQal-o";
 export const LLMApi = {
 
   summarizeThread(emailArr, points = 5){ // [{ party, emailHtml }]
-    const ascEmailArr = emailArr.reverse()
+    const ascEmailArr = emailArr
     const contents = ascEmailArr.map(email=>{
         return {
             role: "user",
@@ -26,6 +26,9 @@ export const LLMApi = {
             },
             {
               text: 'I want you to go through the email trail provided in ascending order and summarize the email',
+            },
+            {
+              text: 'DONOT, I REPEAT DONOT INCLUDE ANY DATA FROM within the <table></table> tags in your summary to reduce clutter',
             },
             {
               text: `Output the summary in no more than ${points} short points. Only output as a html <ul></ul> and nothing else`,

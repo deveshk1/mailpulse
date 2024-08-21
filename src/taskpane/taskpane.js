@@ -1,7 +1,7 @@
 import { getAccessToken } from "../auth/auth";
 import { getGraphAccessToken, getGraphyToken } from "../auth/graph";
 import { minHtml, parseTable, findMismatches, filterNonGmailEmails, processEmailChain } from "../util/utili";
-import { checkIsAgreement } from "./agreement";
+import { checkIsAgreement, extractAgreedValue } from "./agreement";
 import { LLMApi } from "./common/llm";
 import { HtmlLogger } from "./common/logging";
 import { EmailCleaner, OfficeUtils } from "./common/office";
@@ -37,11 +37,13 @@ export async function init() {
   const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
   HtmlLogger.setStatus("Analyzing e-mail thread for agreement...");
-  const [agreementResponse, summary] = await Promise.all([
+  const [agreementResponse, summary, agreedValue] = await Promise.all([
     checkIsAgreement(emailsArr),
     LLMApi.summarizeThread(emailsArr),
+    extractAgreedValue(emailsArr),
   ]);
 
+  HtmlLogger.log(agreedValue)
   const AGREEMENT = "SG and Client both are in mutual agreement";
   const NON_AGREEMENT = "SG and Client both are not agreement";
   HtmlLogger.setOutput(HtmlLogger.okHead(AGREEMENT));
@@ -53,7 +55,7 @@ export async function init() {
       </p>
       ${HtmlLogger.okHead(AGREEMENT)}
       <h4>Actions:</h4>
-        <button onClick='window.open("/assets/pay.html");' style='background-color:green;color:white;padding:10px;border-radius:10px;width:100%'>Settle</button>
+        <button onClick='window.open("/assets/pay.html?agreedValue=${encodeURIComponent(agreedValue)}");' style='background-color:green;color:white;padding:10px;border-radius:10px;width:100%'>Settle</button>
       </p>
     `;
     HtmlLogger.setOutput(outputHtml);

@@ -25,7 +25,7 @@ export const HtmlLogger = {
     let startTime = Date.now();
     let timerId = setInterval(() => {
       const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
-      timerDisplay.innerText = `You Waited : ${elapsedTime}s`;
+      timerDisplay.innerText = `${elapsedTime}s`;
     }, 10);
     gTimerId = timerId
     return timerId;
