@@ -78,3 +78,26 @@
 b {
     font-weight: bold;
 }
+
+table {
+    width: 100%;
+    border-collapse: collapse; /* Ensures borders are collapsed into a single line */
+}
+
+/* Style table headers */
+th {
+    border: 2px solid black; /* Adds border to table headers */
+    padding: 8px; /* Adds space inside the header cells */
+    background-color: #f2f2f2; /* Adds a background color to the headers */
+}
+
+/* Style table data cells */
+td {
+    border: 1px solid black; /* Adds border to table cells */
+    padding: 8px; /* Adds space inside the data cells */
+}
+
+/* Optional: Add border to the entire table */
+table {
+    border: 2px solid black;
+}

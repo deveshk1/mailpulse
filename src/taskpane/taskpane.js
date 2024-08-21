@@ -1,10 +1,11 @@
-import { getAccessToken } from "../auth/auth";
-import { getGraphAccessToken, getGraphyToken } from "../auth/graph";
-import { minHtml, parseTable, findMismatches, filterNonGmailEmails, processEmailChain } from "../util/utili";
+import { getGraphyToken } from "../auth/graph";
+import { minHtml } from "../util/utili";
 import { checkIsAgreement, extractAgreedValue } from "./agreement";
 import { LLMApi } from "./common/llm";
 import { HtmlLogger } from "./common/logging";
 import { EmailCleaner, OfficeUtils } from "./common/office";
+import { checkForMismatches, detectDisagreedCaclTable } from "./disagreement";
+import MockSor from "./mock/mismatch/sor.json";
 
 const axios = require("axios");
 
@@ -12,15 +13,15 @@ Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    var isRun = false
-    function onClick(){
-      if(isRun){
-        return
+    var isRun = false;
+    function onClick() {
+      if (isRun) {
+        return;
       }
-      isRun = true
-      init().finally(()=>{
-        isRun = false
-      })
+      isRun = true;
+      init().finally(() => {
+        isRun = false;
+      });
     }
     document.getElementById("run").onclick = onClick;
   }
@@ -36,17 +37,21 @@ export async function init() {
 
   const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
-  HtmlLogger.setStatus("Analyzing e-mail thread for agreement...");
+
+  const allTables = emailsArr.map((e) => {
+    let table = ragHelper.parseTable(e.emailHtml);
+    return { party: e.party, data: table };
+  });
+
+  // HtmlLogger.setStatus("Analyzing e-mail thread for agreement...");
   const [agreementResponse, summary, agreedValue] = await Promise.all([
     checkIsAgreement(emailsArr),
     LLMApi.summarizeThread(emailsArr),
     extractAgreedValue(emailsArr),
   ]);
 
-  HtmlLogger.log(agreedValue)
   const AGREEMENT = "SG and Client both are in mutual agreement";
-  const NON_AGREEMENT = "SG and Client both are not agreement";
-  HtmlLogger.setOutput(HtmlLogger.okHead(AGREEMENT));
+  const NON_AGREEMENT = "SG and Client both are not in agreement";
   if (!agreementResponse.includes("not_agreed")) {
     let outputHtml = `
       <p>
@@ -60,14 +65,20 @@ export async function init() {
     `;
     HtmlLogger.setOutput(outputHtml);
   } else {
+    const dataInCurrentEmail = allTables[0]?.data;
+    const conflictTable = await detectDisagreedCaclTable(emailsArr[0]);
+    const conflictTableData = ragHelper.parseTable(conflictTable, null, 2);
+    const mismatches = await checkForMismatches(conflictTableData, MockSor);
+    const mismatchJson = HtmlLogger.extractJSONFromMarkdown(mismatches)[0];
+
     let outputHtml = `
     <p>
     <h4>Summary:</h4>
-    ${summary}
+        ${summary}
     </p>
-    ${HtmlLogger.notOkHead(NON_AGREEMENT)}
+        ${HtmlLogger.notOkHead(NON_AGREEMENT)}
     <h4>Conflicts:</h4>
-
+        ${HtmlLogger.generateTableFromJSON(mismatchJson)}
     </p>
   `;
     HtmlLogger.setOutput(outputHtml);

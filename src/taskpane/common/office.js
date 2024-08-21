@@ -39,6 +39,33 @@ function cleanNode(node) {
 }
 
 export class EmailCleaner {
+  parseTable(tableElement) {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(tableElement, "text/html");
+    const tables = doc.querySelectorAll("table");
+    const allTablesData = [];
+
+    tables.forEach((table) => {
+      const tableData = [];
+      const rows = table.querySelectorAll("tr");
+
+      rows.forEach((row) => {
+        const rowData = [];
+        const cells = row.querySelectorAll("td, th");
+
+        cells.forEach((cell) => {
+          rowData.push(cell.textContent.trim());
+        });
+
+        tableData.push(rowData);
+      });
+
+      allTablesData.push(tableData);
+    });
+
+    return allTablesData;
+  }
+
   cleanHtml(messyHtml) {
     const parser = new DOMParser();
     const doc = parser.parseFromString(messyHtml, "text/html");

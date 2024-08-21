@@ -18,7 +18,7 @@ export function extractAgreedValue(emailThreadArr){
         role: "user",
         parts: [
           {
-            text: 'Act as a worlds best email reviwer',
+            text: 'Act as a worlds best email reviewer',
           },
           {
             text: 'I want you to go through the email trail provided in ascending order and Look for mutual AGREEMENT OR DISAGREEMENT',
@@ -64,10 +64,10 @@ export function checkIsAgreement(emailThreadArr = []){ // [{ party, emailHtml }]
               text: 'Act as a worlds best email reviwer',
             },
             {
-              text: 'I want you to go through the email trail provided in ascending order and Look for mutual AGREEMENT OR DISAGREEMENT',
+              text: 'I want you to go through the email trail provided in ascending order and Look for DISAGREEMENT or DISCRIPANCY or MISMATCH',
             },
             {
-              text: 'Mutual AGREEMENT can only be there if there are NO conflicts/mismatches/disagreements or both parties come to a mutual agreement on all data',
+              text: 'LOOK FOR ANY DISAGREEMENTS or conflicts/mismatches/disagreements',
             },
             {
               text: "YOU MUST GIVE YOUR OUTPUT IN one word format. YOUR RESPONSE should be either 'agreed' or 'not_agreed' and nothing else",
