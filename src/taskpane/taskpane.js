@@ -1,6 +1,6 @@
 import { getAccessToken } from "../auth/auth";
 import { getGraphAccessToken, getGraphyToken } from "../auth/graph";
-import { minHtml, parseTable,findMismatches,filterNonGmailEmails, processEmailChain } from "../util/utili";
+import { cleanHtml, parseTable, findMismatches, filterNonGmailEmails, processEmailChain } from "../util/utili";
 
 const axios = require("axios");
 /*
@@ -18,1582 +18,77 @@ Office.onReady((info) => {
   }
 });
 
-
-var SAMPLE = `<div class="apiBody">
-<div>
-  <div dir="ltr">
-    Hi team,
-    <div><br /></div>
-    <div>
-      Please can you confirm the below cash flows for value date 22-Jul-2024
-    </div>
-    <div>
-      Kindly be advised that unless otherwise specified, NY Bank will settle
-      below mentioned cashflows&nbsp;as NET.
-    </div>
-    <div><br /></div>
-    <div>Total USD=49,024.90</div>
-    <div><br /></div>
-    <div>
-      <table
-        border="0"
-        cellpadding="0"
-        cellspacing="0"
-        width="1236"
-        style="border-collapse: collapse; width: 930pt"
-      >
-        <colgroup>
-          <col width="90" style="width: 68pt" />
-          <col width="46" style="width: 35pt" />
-          <col width="147" style="width: 110pt" />
-          <col width="32" style="width: 24pt" />
-          <col width="149" style="width: 112pt" />
-          <col width="111" style="width: 83pt" />
-          <col width="69" style="width: 52pt" />
-          <col width="42" style="width: 32pt" />
-          <col width="138" style="width: 104pt" />
-          <col width="63" style="width: 47pt" />
-          <col width="90" style="width: 68pt" />
-          <col width="110" style="width: 83pt" />
-          <col width="149" style="width: 112pt" />
-        </colgroup>
-        <tbody>
-          <tr height="19" style="height: 14.4pt">
-            <td
-              height="19"
-              width="90"
-              style="
-                height: 14.4pt;
-                width: 68pt;
-                font-weight: 700;
-                border: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              DEAL ID
-            </td>
-            <td
-              width="46"
-              style="
-                border-left: none;
-                width: 35pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SDS ID
-            </td>
-            <td
-              width="147"
-              style="
-                border-left: none;
-                width: 110pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              ORIGINAL VALUE DATE
-            </td>
-            <td
-              width="32"
-              style="
-                border-left: none;
-                width: 24pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              CCY
-            </td>
-            <td
-              width="149"
-              style="
-                border-left: none;
-                width: 112pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SETTLEMENT AMOUNT
-            </td>
-            <td
-              width="111"
-              style="
-                border-left: none;
-                width: 83pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              NY Bank P/R
-            </td>
-            <td
-              width="69"
-              style="
-                border-left: none;
-                width: 52pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SI STATUS
-            </td>
-            <td
-              width="42"
-              style="
-                border-left: none;
-                width: 32pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              BOOK
-            </td>
-            <td
-              width="138"
-              style="
-                border-left: none;
-                width: 104pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SETTLEMENT STATUS
-            </td>
-            <td
-              width="63"
-              style="
-                border-left: none;
-                width: 47pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              TRADE ID
-            </td>
-            <td
-              width="90"
-              style="
-                border-left: none;
-                width: 68pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              LEGAL ENTITY
-            </td>
-            <td
-              width="110"
-              style="
-                border-left: none;
-                width: 83pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              TEAM LOCATION
-            </td>
-            <td
-              width="149"
-              style="
-                border-left: none;
-                width: 112pt;
-                font-weight: 700;
-                border-top: 0.5pt solid windowtext;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              COUNTERPARTY NAME
-            </td>
-          </tr>
-          <tr height="19" style="height: 14.4pt">
-            <td
-              height="19"
-              style="
-                height: 14.4pt;
-                border-top: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                border-left: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              ABC123456DE
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1000
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              22-Jul-21
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              USD
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              321195.19
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              NY Bank Receives
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Allocated
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Unmatched
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              123456
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              111111
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              MUM
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SOCIETE GENERALE SA
-            </td>
-          </tr>
-          <tr height="19" style="height: 14.4pt">
-            <td
-              height="19"
-              style="
-                height: 14.4pt;
-                border-top: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                border-left: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              ABC123456DE
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1000
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              22-Jul-21
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              USD
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              -6750.51
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              NY Bank Pays
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Allocated
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Unmatched
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              123456
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              111111
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              MUM
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SOCIETE GENERALE SA
-            </td>
-          </tr>
-          <tr height="19" style="height: 14.4pt">
-            <td
-              height="19"
-              style="
-                height: 14.4pt;
-                border-top: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                border-left: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              DEF45678GH
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1000
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              22-Jul-21
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              USD
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              -419475.88
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              NY Bank Pays
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Allocated
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              2
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Unmatched
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              45678
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              222222
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              MUM
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SOCIETE GENERALE SA
-            </td>
-          </tr>
-          <tr height="19" style="height: 14.4pt">
-            <td
-              height="19"
-              style="
-                height: 14.4pt;
-                border-top: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                border-left: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              DEF45678GH
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1000
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              22-Jul-21
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              USD
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              154055.05
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              NY Bank Receives
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Allocated
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              2
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Unmatched
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              45678
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              222222
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              MUM
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SOCIETE GENERALE SA
-            </td>
-          </tr>
-          <tr height="19" style="height: 14.4pt">
-            <td
-              height="19"
-              style="
-                height: 14.4pt;
-                border-top: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                border-left: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              &nbsp;
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1000
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              22-Jul-21
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              USD
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              1.05
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              NY Bank Receives
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Allocated
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              3
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              Unmatched
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              765432
-            </td>
-            <td
-              align="right"
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              333333
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              MUM
-            </td>
-            <td
-              style="
-                border-top: none;
-                border-left: none;
-                border-right: 0.5pt solid windowtext;
-                border-bottom: 0.5pt solid windowtext;
-                padding-top: 1px;
-                padding-right: 1px;
-                padding-left: 1px;
-                color: black;
-                font-size: 11pt;
-                font-family: Calibri, sans-serif;
-                vertical-align: bottom;
-              "
-            >
-              SOCIETE GENERALE SA
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <br />
-    </div>
-    <div>Regards,</div>
-    <div>NY Bank</div>
-  </div>
-</div>
-</div>
-`
-
 export async function run2() {
-  
   let insertAt = document.getElementById("item-subject");
 
   const running = document.getElementById("run");
   running.innerText = "Analyzing...";
 
-  
+  //show time take to provide response
   const timerDisplay = document.getElementById("timer");
   let startTime = Date.now();
-   // Update timer every second
-   let timerInterval = setInterval(() => {
+  // Update timer every second
+  let timerInterval = setInterval(() => {
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
     timerDisplay.innerText = `You Waited : ${elapsedTime}s`;
   }, 10);
 
-
-  const item = Office.context.mailbox.item.;
-  // console.log(Office.context.mailbox.item.conversationId);
-
+  // outlook mailbox
+  const item = Office.context.mailbox.item;
 
   const emailBody = await new Promise((resolve, reject) => {
     item.body.getAsync(Office.CoercionType.Html, resolve);
   });
 
-
   console.log(emailBody.value);
-  const mini = minHtml(emailBody.value);
-console.log(mini);  
+  const clean_html = cleanHtml(emailBody.value);
+  console.log(clean_html);
 
-// Function to get the HTML body of the current email
-function getCurrentMailBody() {
-  Office.context.mailbox.item.body.getAsync(
-      "html",
-      function (result) {
-          if (result.status === Office.AsyncResultStatus.Succeeded) {
-              // Successfully retrieved the HTML body
-              console.log("HTML Body:", result.value);
-              
-              // You can now process the HTML body as needed
-              processEmailBody(minHtml(result.value));
-          } else {
-              // Error retrieving the HTML body
-              console.error("Error retrieving the HTML body:", result.error);
-          }
+  // Function to get the HTML body of the current email
+  function getCurrentMailBody() {
+    Office.context.mailbox.item.body.getAsync("html", function (result) {
+      if (result.status === Office.AsyncResultStatus.Succeeded) {
+        // Successfully retrieved the HTML body
+        console.log("HTML Body:", result.value);
+
+        // You can now process the HTML body as needed
+        processEmailBody(cleanHtml(result.value));
+      } else {
+        // Error retrieving the HTML body
+        console.error("Error retrieving the HTML body:", result.error);
       }
-  );
-}
+    });
+  }
 
-// Function to process the email body (example placeholder)
-function processEmailBody(htmlBody) {
-  // Example processing of the email body
-  console.log("Processing email body:", htmlBody);
-  // const r = extractLatestEmail(htmlBody);
-  // console.log(r);
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(htmlBody, 'text/html');
-  
-  // Preserve the first div
-  const firstDiv = doc.querySelector('div');
-  
-  // Remove divs containing dates - corrected approach
-  const dateCells = doc.querySelectorAll('td:contains("22-07-2024")');
-  dateCells.forEach(cell => {
-      // Get the parent div of the date cell
-      const parentDiv = cell.closest('div'); 
-      if (parentDiv) { 
-          parentDiv.remove();
-      }
-  });
-  
-  // Remove the entire blockquote
-  doc.querySelector('blockquote').remove();
-  
-  // Get the cleaned HTML
-  const cleanHtml = firstDiv.outerHTML;
-  
-  console.log(cleanHtml);
+  // Function to process the email body (example placeholder)
+  function processEmailBody(htmlBody) {
+    // Example processing of the email body
+    console.log("Processing email body:", htmlBody);
+    // const r = extractLatestEmail(htmlBody);
+    // console.log(r);
+  }
 
-}
-
-// Ensure Office.js is ready before calling getCurrentMailBody
-Office.onReady(function (info) {
-  if (info.host === Office.HostType.Outlook) {
+  // Ensure Office.js is ready before calling getCurrentMailBody
+  Office.onReady(function (info) {
+    if (info.host === Office.HostType.Outlook) {
       // Call the function to get the current mail body
       getCurrentMailBody();
-  }
-});
+    }
+  });
 
+  // if (true) {
+  //   // TODO: extract emails only FROM CLIENT
 
+  //   let html = cleanHtml(emailBody.value);
+  //   const mismatch_result = findMismatches(html);
+  //   console.log(mismatch_result);
 
-
-
-
-
-
-if(true){
-    // TODO: extract emails only FROM CLIENT
-   
-    let html = minHtml(emailBody.value)
-    findMismatches(html)
-
-
-    var div = document.createElement("div");
-    // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
-    div.innerHTML = `<textarea style='width:250px;'>${html}</textarea>`;
-    insertAt.appendChild(div);
-    return 
-  }
+  //   var div = document.createElement("div");
+  //   // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
+  //   div.innerHTML = `<textarea style='width:250px;'>${html}</textarea>`;
+  //   insertAt.appendChild(div);
+  //   return;
+  // }
 
   const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
@@ -1602,71 +97,6 @@ if(true){
 
   const data = {
     contents: [
-      {
-        role: "user",
-        parts: [
-          {
-            text: "Hello, who are you",
-          },
-        ],
-      },
-      {
-        role: "model",
-        parts: [
-          {
-            text: "I am MailPulse, your smart AI mail assistant",
-          },
-        ],
-      },
-      {
-        role: "user",
-        parts: [
-          {
-            text: "Dear Devesh\n\nI hope this email finds you well. I am writing to express my interest in purchasing stock in Société Générale.\n\nCould you please provide me with the necessary details and procedures for acquiring shares in Société Générale? Specifically, I would like information on the following:\n\nCurrent Stock Price: The current market value of Société Générale shares.\nMinimum Purchase Requirement: Any minimum number of shares or investment amount required for purchase.\nTransaction Process: The steps involved in completing the purchase, including any documentation or forms that need to be completed.\nPayment Options: Available methods for payment and any associated fees.\nTiming and Availability: The timeline for the transaction and the availability of shares.\nfor time being i would want you to sell societe generale equity stock of 500 quantity at price 10 eur\nfor time being i would want you to buy societe generale equity stock of 800 quantity at price 10 eur\nalso buy Tesla share for 200$  and sell microsoft share of 50$\nPlease let me know if there are any additional considerations or information I should be aware of before proceeding. If possible, I would appreciate a meeting or a call to discuss the details further.\n\nThank you for your assistance. I look forward to your response.\n\nBest regards,\n\nKumar Das\n",
-          },
-        ],
-      },
-      {
-        role: "model",
-        parts: [
-          {
-            text: "```html\n<h2>Email Summary</h2>\n<ul>\n  <li>Request for information on purchasing Société Générale stock.</li>\n  <li>Specific details requested: current stock price, minimum purchase requirement, transaction process, payment options, timing and availability.</li>\n  <li>Request to sell 500 Société Générale shares at 10 EUR.</li>\n  <li>Request to buy 800 Société Générale shares at 10 EUR.</li>\n  <li>Request to buy 200 Tesla shares at 200 USD.</li>\n  <li>Request to sell 50 Microsoft shares at 50 USD.</li>\n  <li>Request for a meeting or call to discuss further.</li>\n</ul>\n\n<h2>Action Items</h2>\n<button style=\"background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/buy'''\">Buy 800 Société Générale @ 10 EUR</button>\n<button style=\"background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/sell'''\">Sell 500 Société Générale @ 10 EUR</button>\n<button style=\"background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/buy'''\">Buy 200 Tesla @ 200 USD</button>\n<button style=\"background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/sell'''\">Sell 50 Microsoft @ 50 USD</button>\n<button style=\"background-color: purple; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/meeting'''\">Schedule Meeting with Kumar Das</button>\n```\n",
-          },
-        ],
-      },
-      {
-        role: "user",
-        parts: [
-          {
-            text: "Dear Devesh,I hope this message finds you well. I am interested in purchasing shares in Apple Inc.Could you please provide me with the following information?Current Stock Price: The current market value of Apple shares.Minimum Purchase Requirement: The minimum number of shares or investment amount required.Transaction Process: Steps to complete the purchase, including necessary documentation.Payment Options: Available methods for payment and any associated fees.Timing and Availability: The timeline for the transaction and the availability of shares.Additionally, I would like to:Sell 100 shares of Amazon at $1500 each.Buy 50 shares of Google at $1200 each.Buy 30 shares of Facebook at $250 each.Sell 40 shares of Netflix at $400 each.Please inform me of any other considerations or information I should be aware of. I would appreciate a meeting or call to discuss these details further.Thank you for your assistance. I look forward to your response.Best regards,John Smith\n",
-          },
-        ],
-      },
-      {
-        role: "model",
-        parts: [
-          {
-            text: "```html\n<h2>Email Summary</h2>\n<ul>\n  <li>Request for information on purchasing Apple Inc. stock.</li>\n  <li>Specific details requested: current stock price, minimum purchase requirement, transaction process, payment options, timing and availability.</li>\n  <li>Request to sell 100 Amazon shares at $1500 each.</li>\n  <li>Request to buy 50 Google shares at $1200 each.</li>\n  <li>Request to buy 30 Facebook shares at $250 each.</li>\n  <li>Request to sell 40 Netflix shares at $400 each.</li>\n  <li>Request for a meeting or call to discuss further.</li>\n</ul>\n\n<h2>Action Items</h2>\n<button style=\"background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/sell'''\">Sell 100 Amazon @ $1500</button>\n<button style=\"background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/buy'''\">Buy 50 Google @ $1200</button>\n<button style=\"background-color: green; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/buy'''\">Buy 30 Facebook @ $250</button>\n<button style=\"background-color: red; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/sell'''\">Sell 40 Netflix @ $400</button>\n<button style=\"background-color: purple; color: white; padding: 10px 20px; border: none; cursor: pointer;\" onclick=\"window.location.href='''/meeting'''\">Schedule Meeting with John Smith</button>\n```\n",
-          },
-        ],
-      },
-      {
-        role: "user",
-        parts: [
-          {
-            text: "Dear Devesh,\nI hope this email finds you well.\nI am writing to bring to your immediate attention an issue we encountered with the settlement of order #478562, which was executed on 1st August 2024. The trade involved the purchase of 50,000 shares of ABC Corporation (ticker: ABC) at a price of $50.75 per share, for a total transaction value of $2,537,500. Despite the trade being confirmed and matched on the trading platform, we have not received the corresponding settlement confirmation from our custodian. This discrepancy is causing significant concern as the settlement date was scheduled for 3rd August 2024, and we are now at risk of a fail.\nGiven the urgency of the matter, I kindly request that you liaise with our custodian to determine the cause of the delay and expedite the settlement process. Additionally, please provide an update on the status of this order at your earliest convenience. If there are any further details or actions required from my end, please let me know, and I will prioritize them to ensure a swift resolution. The timely settlement of this trade is crucial to our portfolio strategy and compliance requirements.\nThank you for your immediate attention to this matter. I look forward to your prompt response.\nBest regards,\nPhil\nTrade User",
-          },
-        ],
-      },
-      {
-        role: "model",
-        parts: [
-          {
-            text: '```html\n<h2>Email Summary</h2>\n<ul>\n  <li>Issue with settlement of order <span style="color:blue">#478562</span>, executed on <span style="color:blue">1st August 2024</span>.</li>\n  <li>Trade involved purchasing <span style="color:blue">50,000</span> shares of ABC Corporation (ticker: ABC) at a price of <span style="color:blue">$50.75</span> per share, for a total transaction value of <span style="color:blue">$2,537,500</span>.</li>\n  <li>Trade confirmed and matched, but settlement confirmation not received from custodian.</li>\n  <li>Settlement date was <span style="color:blue">3rd August 2024</span>, and risk of fail.</li>\n  <li>Request to liaise with custodian to determine cause of delay and expedite settlement.</li>\n  <li>Request for update on order status at earliest convenience.</li>\n  <li>Urgency highlighted due to portfolio strategy and compliance requirements.</li>\n</ul>\n\n<h2>Action Items</h2>\n<button style="background-color: purple; color: white; padding: 10px 20px; border: none; cursor: pointer;" onclick="window.location.href=\'/meeting\'">Schedule Meeting with Phil</button>\n``` \n',
-          },
-        ],
-      },
-
       {
         role: "user",
         parts: [
@@ -1683,24 +113,23 @@ if(true){
           text: '1.summarize email in bullet points in plain html and show action items in form of buy/sell button, do not repeat it in summary as well  in plain html ONLY\nafter writing summary of email in bullet points ,improve the button quality , add more animation to look more attractive\nsummarize in bullet points the action expected from sender of email which should include descriptive action, then show all the buttons(as per previous instructions)\n \n2. create html action buttons in plain html where buy action should be in green colour and sell action should be in red colour\ncreate a purple colour "Schedule Meeting" button similar to buy and sell , also mention the name of the person in meeting button who has requested for meeting\ngenerated html button has button text which says quantity and price with buy or sell action\n3.onclick "buy" should redrect to /buy API and sell to /sell API and schedule meeting buttoin onclick should redirect to /meeting API. \n4.the ouput can contain plain html to show texts and CSS properties can only be used to create and show buttons (colour as per previous instructions ONLY)\n5. Highlight date , any id like #1234 ,price ,quantity in blue colour\n6. when there is mail chain, mention about each mail in summary points in the order of occurance of the mail and its information provided.',
         },
         {
-          text:'Look for AGREEMENT OR DISAGREEMENT FROM ANY PARTY AND MENTION IN THE OUTPUT\n If AGREED : Show "settled"\n If NOT AGREED : show "Not Settled"'
+          text: 'Look for AGREEMENT OR DISAGREEMENT FROM ANY PARTY AND MENTION IN THE OUTPUT\n If AGREED : Show "settled"\n If NOT AGREED : show "Not Settled"',
         },
         {
-          text:'If AGREED or SETTLED : show a action button with above instructions'
+          text: "If AGREED or SETTLED : show a action button with above instructions",
         },
         {
-          text:'If NOT AGREED : show "NOT SETTLED" with grey button' 
+          text: 'If NOT AGREED : show "NOT SETTLED" with grey button',
         },
         {
-          text:'IT IS MANDATORY TO SHOW FINAL RESPONSE ON AGREEMENT FROM CLIENT IF AVAILABLE' 
+          text: "IT IS MANDATORY TO SHOW FINAL RESPONSE ON AGREEMENT FROM CLIENT IF AVAILABLE",
         },
         {
-          text:'IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules.'
+          text: "IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules.",
         },
         {
-          text:'For each case create settled or not settled button immediately after it in summary'
-        }
-        
+          text: "For each case create settled or not settled button immediately after it in summary",
+        },
       ],
     },
     generationConfig: {
@@ -1711,7 +140,6 @@ if(true){
       responseMimeType: "text/plain",
     },
   };
-
 
   const config = {
     headers: {
@@ -1744,8 +172,6 @@ if(true){
   const currentIssueKeywords = await analyzeCurrentEmail(emailBody.value, apiKey);
   const ke = await currentIssueKeywords.keywords;
   const su = await currentIssueKeywords.summary;
-  // console.log(ke);
-
 
   //get access token to cll ms grph api
   let graphAPIAccessToken = await getGraphyToken();
@@ -1760,9 +186,9 @@ if(true){
         return [];
       });
     })
-  ).then((results) => {
-    let good = results.flat().filter((o) => o?.id != undefined);
-    console.log("results.flat()", good);
+  ).then((res) => {
+    let good = res.flat().filter((o) => o?.id != undefined);
+    console.log("res.flat()", good);
     const map = new Map();
     for (let i = 0; i < good.length; i++) {
       map.set(good[i].id, good[i]);
@@ -1780,7 +206,6 @@ if(true){
   // const similarIssue = await searchBox(currentIssueKeywords);
   // console.log(similarIssue);
 
-
   insertAt.appendChild(document.createElement("br"));
 
   var div = document.createElement("div");
@@ -1788,13 +213,12 @@ if(true){
   div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html", "").replace("```", "")}</div>`;
   insertAt.appendChild(div);
 
-
   var div2 = document.createElement("div");
   // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
-  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map(mail=>`<li>${mail.subject}</li>`).join("<br/>") }</ul>`;  
+  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map((mail) => `<li>${mail.subject}</li>`).join("<br/>")}</ul>`;
   insertAt.appendChild(div2);
-  
-clearInterval(timerInterval);
+
+  clearInterval(timerInterval);
   running.innerText = "";
 }
 
@@ -1828,7 +252,6 @@ export async function run() {
 
   const item = Office.context.mailbox.item;
   console.log(Office.context.mailbox.item.conversationId);
-
 
   const emailBody = await new Promise((resolve, reject) => {
     item.body.getAsync(Office.CoercionType.Text, resolve);
@@ -1886,13 +309,11 @@ export async function run() {
   let insertAt = document.getElementById("item-subject");
   insertAt.appendChild(document.createElement("br"));
 
-  
-
   var div = document.createElement("div");
   div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html", "").replace("```", "")}</div>`;
   insertAt.appendChild(div);
 
-clearInterval(timerInterval);
+  clearInterval(timerInterval);
 
   running.innerText = "";
 }
@@ -1916,7 +337,6 @@ clearInterval(timerInterval);
 // }
 
 //search graphAPI
-
 
 async function searchEmails(accessToken, searchQueryArr) {
   let query = searchQueryArr
@@ -2041,4 +461,3 @@ async function extractKeywords(text) {
     return acc;
   }, {});
 }
-
