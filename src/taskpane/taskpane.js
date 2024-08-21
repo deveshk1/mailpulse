@@ -1,134 +1,123 @@
 import { getAccessToken } from "../auth/auth";
 import { getGraphAccessToken, getGraphyToken } from "../auth/graph";
-import { minHtml, parseTable,findMismatches,filterNonGmailEmails, processEmailChain } from "../util/utili";
+import { minHtml, parseTable, findMismatches, filterNonGmailEmails, processEmailChain } from "../util/utili";
+import { HtmlLogger } from "./common/logging";
+import { EmailCleaner, OfficeUtils } from "./common/office";
 
 const axios = require("axios");
-/*
- * Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
- * See LICENSE in the project root for license information.
- */
-
-/* global document, Office */
 
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     document.getElementById("sideload-msg").style.display = "none";
     document.getElementById("app-body").style.display = "flex";
-    document.getElementById("run").onclick = run2;
+    document.getElementById("run").onclick = init;
   }
 });
 
+export async function init() {
+  const currentEmailSender = await OfficeUtils.getCurrentEmailSender()
+  const currentEmailStr = `<b>From:</b> NY Bank &lt;<a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
+  const ragHelper = new EmailCleaner();
+  
+  const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
+  const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
+  // HtmlLogger.log(cleanedHtml);
 
+  // HtmlLogger.log(JSON.stringify(emailsArr, null, 2));
+}
 
 export async function run2() {
-  
   let insertAt = document.getElementById("item-subject");
 
   const running = document.getElementById("run");
   running.innerText = "Analyzing...";
 
-  
   const timerDisplay = document.getElementById("timer");
   let startTime = Date.now();
-   // Update timer every second
-   let timerInterval = setInterval(() => {
+  // Update timer every second
+  let timerInterval = setInterval(() => {
     const elapsedTime = ((Date.now() - startTime) / 1000).toFixed(2);
     timerDisplay.innerText = `You Waited : ${elapsedTime}s`;
   }, 10);
 
-
   const item = Office.context.mailbox.item;
   // console.log(Office.context.mailbox.item.conversationId);
-
 
   const emailBody = await new Promise((resolve, reject) => {
     item.body.getAsync(Office.CoercionType.Html, resolve);
   });
 
-
   console.log(emailBody.value);
   const mini = minHtml(emailBody.value);
-console.log(mini);  
+  console.log(mini);
 
-// Function to get the HTML body of the current email
-function getCurrentMailBody() {
-  Office.context.mailbox.item.body.getAsync(
-      "html",
-      function (result) {
-          if (result.status === Office.AsyncResultStatus.Succeeded) {
-              // Successfully retrieved the HTML body
-              console.log("HTML Body:", result.value);
-              
-              // You can now process the HTML body as needed
-              processEmailBody(minHtml(result.value));
-          } else {
-              // Error retrieving the HTML body
-              console.error("Error retrieving the HTML body:", result.error);
-          }
+  // Function to get the HTML body of the current email
+  function getCurrentMailBody() {
+    Office.context.mailbox.item.body.getAsync("html", function (result) {
+      if (result.status === Office.AsyncResultStatus.Succeeded) {
+        // Successfully retrieved the HTML body
+        console.log("HTML Body:", result.value);
+
+        // You can now process the HTML body as needed
+        processEmailBody(minHtml(result.value));
+      } else {
+        // Error retrieving the HTML body
+        console.error("Error retrieving the HTML body:", result.error);
       }
-  );
-}
+    });
+  }
 
-// Function to process the email body (example placeholder)
-function processEmailBody(htmlBody) {
-  // Example processing of the email body
-  console.log("Processing email body:", htmlBody);
-  // const r = extractLatestEmail(htmlBody);
-  // console.log(r);
-  // const parser = new DOMParser();
-  // const doc = parser.parseFromString(htmlBody, 'text/html');
-  
-  // // Preserve the first div
-  // const firstDiv = doc.querySelector('div');
-  
-  // // Remove divs containing dates - corrected approach
-  // const dateCells = doc.querySelectorAll('td:contains("22-07-2024")');
-  // dateCells.forEach(cell => {
-  //     // Get the parent div of the date cell
-  //     const parentDiv = cell.closest('div'); 
-  //     if (parentDiv) { 
-  //         parentDiv.remove();
-  //     }
-  // });
-  
-  // // Remove the entire blockquote
-  // doc.querySelector('blockquote').remove();
-  
-  // // Get the cleaned HTML
-  // const cleanHtml = firstDiv.outerHTML;
-  
-  // console.log(cleanHtml);
+  // Function to process the email body (example placeholder)
+  function processEmailBody(htmlBody) {
+    // Example processing of the email body
+    console.log("Processing email body:", htmlBody);
+    // const r = extractLatestEmail(htmlBody);
+    // console.log(r);
+    // const parser = new DOMParser();
+    // const doc = parser.parseFromString(htmlBody, 'text/html');
 
-}
+    // // Preserve the first div
+    // const firstDiv = doc.querySelector('div');
 
-// Ensure Office.js is ready before calling getCurrentMailBody
-Office.onReady(function (info) {
-  if (info.host === Office.HostType.Outlook) {
+    // // Remove divs containing dates - corrected approach
+    // const dateCells = doc.querySelectorAll('td:contains("22-07-2024")');
+    // dateCells.forEach(cell => {
+    //     // Get the parent div of the date cell
+    //     const parentDiv = cell.closest('div');
+    //     if (parentDiv) {
+    //         parentDiv.remove();
+    //     }
+    // });
+
+    // // Remove the entire blockquote
+    // doc.querySelector('blockquote').remove();
+
+    // // Get the cleaned HTML
+    // const cleanHtml = firstDiv.outerHTML;
+
+    // console.log(cleanHtml);
+  }
+
+  // Ensure Office.js is ready before calling getCurrentMailBody
+  Office.onReady(function (info) {
+    if (info.host === Office.HostType.Outlook) {
       // Call the function to get the current mail body
       getCurrentMailBody();
-  }
-});
+    }
+  });
 
+  // if(true){
+  //     // TODO: extract emails only FROM CLIENT
 
+  //     let html = minHtml(emailBody.value)
+  //     findMismatches(html)
 
-
-
-
-
-
-// if(true){
-//     // TODO: extract emails only FROM CLIENT
-   
-//     let html = minHtml(emailBody.value)
-//     findMismatches(html)
-
-
-//     var div = document.createElement("div");
-//     // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
-//     div.innerHTML = `<textarea style='width:250px;'>${html}</textarea>`;
-//     insertAt.appendChild(div);
-//     return 
-//   }
+  //     var div = document.createElement("div");
+  //     // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
+  //     div.innerHTML = `<textarea style='width:250px;'>${html}</textarea>`;
+  //     insertAt.appendChild(div);
+  //     return
+  //   }
 
   const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 
@@ -218,24 +207,23 @@ Office.onReady(function (info) {
           text: '1.summarize email in bullet points in plain html and show action items in form of buy/sell button, do not repeat it in summary as well  in plain html ONLY\nafter writing summary of email in bullet points ,improve the button quality , add more animation to look more attractive\nsummarize in bullet points the action expected from sender of email which should include descriptive action, then show all the buttons(as per previous instructions)\n \n2. create html action buttons in plain html where buy action should be in green colour and sell action should be in red colour\ncreate a purple colour "Schedule Meeting" button similar to buy and sell , also mention the name of the person in meeting button who has requested for meeting\ngenerated html button has button text which says quantity and price with buy or sell action\n3.onclick "buy" should redrect to /buy API and sell to /sell API and schedule meeting buttoin onclick should redirect to /meeting API. \n4.the ouput can contain plain html to show texts and CSS properties can only be used to create and show buttons (colour as per previous instructions ONLY)\n5. Highlight date , any id like #1234 ,price ,quantity in blue colour\n6. when there is mail chain, mention about each mail in summary points in the order of occurance of the mail and its information provided.',
         },
         {
-          text:'Look for AGREEMENT OR DISAGREEMENT FROM ANY PARTY AND MENTION IN THE OUTPUT\n If AGREED : Show "settled"\n If NOT AGREED : show "Not Settled"'
+          text: 'Look for AGREEMENT OR DISAGREEMENT FROM ANY PARTY AND MENTION IN THE OUTPUT\n If AGREED : Show "settled"\n If NOT AGREED : show "Not Settled"',
         },
         {
-          text:'If AGREED or SETTLED : show a action button with above instructions'
+          text: "If AGREED or SETTLED : show a action button with above instructions",
         },
         {
-          text:'If NOT AGREED : show "NOT SETTLED" with grey button' 
+          text: 'If NOT AGREED : show "NOT SETTLED" with grey button',
         },
         {
-          text:'IT IS MANDATORY TO SHOW FINAL RESPONSE ON AGREEMENT FROM CLIENT IF AVAILABLE' 
+          text: "IT IS MANDATORY TO SHOW FINAL RESPONSE ON AGREEMENT FROM CLIENT IF AVAILABLE",
         },
         {
-          text:'IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules.'
+          text: "IT IS MANDATORY TO SHOW SETTLED OR NOT SETTLED in the response, based on above rules.",
         },
         {
-          text:'For each case create settled or not settled button immediately after it in summary'
-        }
-        
+          text: "For each case create settled or not settled button immediately after it in summary",
+        },
       ],
     },
     generationConfig: {
@@ -246,7 +234,6 @@ Office.onReady(function (info) {
       responseMimeType: "text/plain",
     },
   };
-
 
   const config = {
     headers: {
@@ -281,7 +268,6 @@ Office.onReady(function (info) {
   const su = await currentIssueKeywords.summary;
   // console.log(ke);
 
-
   //get access token to cll ms grph api
   let graphAPIAccessToken = await getGraphyToken();
 
@@ -315,7 +301,6 @@ Office.onReady(function (info) {
   // const similarIssue = await searchBox(currentIssueKeywords);
   // console.log(similarIssue);
 
-
   insertAt.appendChild(document.createElement("br"));
 
   var div = document.createElement("div");
@@ -323,13 +308,12 @@ Office.onReady(function (info) {
   div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html", "").replace("```", "")}</div>`;
   insertAt.appendChild(div);
 
-
   var div2 = document.createElement("div");
   // div.innerHTML = `<div style='width:250px;'>${result.response.text()}</div>`
-  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map(mail=>`<li>${mail.subject}</li>`).join("<br/>") }</ul>`;  
+  div2.innerHTML = `<ul style='width:250px;'>${allSearchResults.map((mail) => `<li>${mail.subject}</li>`).join("<br/>")}</ul>`;
   insertAt.appendChild(div2);
-  
-clearInterval(timerInterval);
+
+  clearInterval(timerInterval);
   running.innerText = "";
 }
 
@@ -363,7 +347,6 @@ export async function run() {
 
   const item = Office.context.mailbox.item;
   console.log(Office.context.mailbox.item.conversationId);
-
 
   const emailBody = await new Promise((resolve, reject) => {
     item.body.getAsync(Office.CoercionType.Text, resolve);
@@ -421,13 +404,11 @@ export async function run() {
   let insertAt = document.getElementById("item-subject");
   insertAt.appendChild(document.createElement("br"));
 
-  
-
   var div = document.createElement("div");
   div.innerHTML = `<div style='width:250px;'>${gptResponse.replace("```html", "").replace("```", "")}</div>`;
   insertAt.appendChild(div);
 
-clearInterval(timerInterval);
+  clearInterval(timerInterval);
 
   running.innerText = "";
 }
@@ -451,7 +432,6 @@ clearInterval(timerInterval);
 // }
 
 //search graphAPI
-
 
 async function searchEmails(accessToken, searchQueryArr) {
   let query = searchQueryArr
@@ -576,4 +556,3 @@ async function extractKeywords(text) {
     return acc;
   }, {});
 }
-
