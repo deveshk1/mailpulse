@@ -1,6 +1,7 @@
-export class PromptService {
+import { LLMApi } from "../taskpane/common/llm";
 
-    //calculate mismatch accuracy
+export class PromptService {
+  //calculate mismatch accuracy
   calculateAccuracy() {}
 
   //generate summary
@@ -13,7 +14,7 @@ export class PromptService {
   disagreementPrompt() {}
 
   //find the table with detailed calculation in case of mismatch
-  detectDisagreedCaclTablePrompt(emailHtml) {
+  async detectDisagreedCaclTablePrompt(emailHtml) {
     console.log(emailHtml);
 
     const data = {
@@ -59,7 +60,7 @@ export class PromptService {
       },
     };
 
-    return data;
+    return LLMApi.query(data);
   }
 
   checkForMismatchesPrompt(clientData, apiData) {}

@@ -29,9 +29,9 @@ Office.onReady((info) => {
 export async function init() {
   HtmlLogger.startTimer();
 
-  const currentEmailSender = await OfficeUtils.getCurrentEmailSender(); 
- 
-  console.log(currentEmailSender)
+  const currentEmailSender = await OfficeUtils.getCurrentEmailSender();
+
+  console.log(currentEmailSender);
   const currentEmailStr =
     `<b>From:</b><a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
 
@@ -39,12 +39,11 @@ export async function init() {
 
   const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
 
-console.log(cleanedHtml);
+  console.log(cleanedHtml);
 
-
-//emailsArr containes splited mail chain - as json array of individual mails
+  //emailsArr containes splited mail chain - as json array of individual mails
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
-  console.log(emailsArr)
+  console.log(emailsArr);
 
   const allTables = emailsArr.map((e) => {
     let table = ragHelper.parseTable(e.emailHtml);
@@ -75,14 +74,14 @@ console.log(cleanedHtml);
   } else {
     const dataInCurrentEmail = allTables[0]?.data;
     console.log(emailsArr[0]);
-    
+
     // const conflictTable = await detectDisagreedCaclTable(emailsArr[0]);
-    const conflictTable = promptSer.detectDisagreedCaclTablePrompt(emailsArr[0]); // calucation table
-      console.log(conflictTable);
-    
+    const conflictTable = await promptSer.detectDisagreedCaclTablePrompt(emailsArr[0]); // calucation table
+    console.log(conflictTable);
+
     const conflictTableData = ragHelper.parseTable(conflictTable, null, 2);
 
-console.log(conflictTableData)
+    console.log(conflictTableData);
 
     const mismatches = await checkForMismatches(conflictTableData, MockSor);
     const mismatchJson = HtmlLogger.extractJSONFromMarkdown(mismatches)[0];
