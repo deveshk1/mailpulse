@@ -43,7 +43,9 @@ function cleanNode(node) {
 }
 
 export class EmailCleaner {
-  parseTable(tableElement) {
+
+  async parseTable(tableElement) {
+
     const parser = new DOMParser();
     const doc = parser.parseFromString(tableElement, "text/html");
     const tables = doc.querySelectorAll("table");
@@ -79,9 +81,33 @@ export class EmailCleaner {
   }
 
   splitEmailThread(emailThreadHtml) {
+    console.log(emailThreadHtml);
+    //split email based on tag , add to emailParts array
     const emailParts = emailThreadHtml.split(/<div><font><b>From:|<div>On [^<]+<a/g);
+    console.log(emailParts)
+    
     return emailParts.filter((part) => part.trim() !== "").map((part) => "<div><font><b>From:" + part);
   }
+
+//   splitEmailThread(emailThreadHtml) {
+//     console.log(emailThreadHtml);
+//     // Split email based on tag, add to emailParts array
+//     const emailParts = emailThreadHtml.split(/<div><font><b>From:|<div>On [^<]+<a/g);
+//     console.log(emailParts);
+    
+//     // Create JSON array with each split email
+//     const emailJsonArray = emailParts
+//         .filter((part) => part.trim() !== "") // Filter out empty parts
+//         .map((part) => {
+//             const emailContent = "<div><font><b>From:" + part;
+//             return { emailContent: emailContent }; // Return JSON object for each part
+//         });
+    
+//     console.log(emailJsonArray);
+    
+//     // Return JSON array
+//     return emailParts.filter((part) => part.trim() !== "").map((part) => "<div><font><b>From:" + part);
+// }
 
   extractEmailDetails(emailHtml) {
     const emailDetails = {};

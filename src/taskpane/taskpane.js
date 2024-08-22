@@ -41,6 +41,8 @@ export async function init() {
 
 console.log(cleanedHtml);
 
+
+//emailsArr containes splited mail chain - as json array of individual mails
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
   console.log(emailsArr)
 
@@ -73,9 +75,15 @@ console.log(cleanedHtml);
   } else {
     const dataInCurrentEmail = allTables[0]?.data;
     console.log(emailsArr[0]);
+    
     // const conflictTable = await detectDisagreedCaclTable(emailsArr[0]);
-    const conflictTable = promptSer.detectDisagreedCaclTablePrompt(emailsArr[0]);
+    const conflictTable = promptSer.detectDisagreedCaclTablePrompt(emailsArr[0]); // calucation table
+      console.log(conflictTable);
+    
     const conflictTableData = ragHelper.parseTable(conflictTable, null, 2);
+
+console.log(conflictTableData)
+
     const mismatches = await checkForMismatches(conflictTableData, MockSor);
     const mismatchJson = HtmlLogger.extractJSONFromMarkdown(mismatches)[0];
 

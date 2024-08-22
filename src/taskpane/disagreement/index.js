@@ -2,6 +2,7 @@ import { LLMApi } from "../common/llm";
 import { HtmlLogger } from "../common/logging";
 
 export function checkForMismatches(clientData, sorData){
+  
     HtmlLogger.log(clientData)
     const data = {
         contents: [
@@ -49,7 +50,7 @@ export function checkForMismatches(clientData, sorData){
               text: "THE RELEVANT COLUMNS TO COMPARE from client are only, Initial Price Quantity Initial Price Final Price Initial FX Rate Final FX Rate",
             },
             {
-              text: 'LIST THE MISMATCHES IN THE FOLLOWING FLATENNED JSON ARRAY FORMAT), ONLY OUTPUT the json array [ { Field:"column name",  Client:"value from client data",  API:"value from sor data", } ]',
+              text: 'LIST THE MISMATCHES IN THE FOLLOWING FLATENNED JSON ARRAY FORMAT), ONLY OUTPUT the json array [ { Field:"column name",  Client:"value from client data",  API:"value from sor data", Accuracy: "calculate client vs API in %" } ]',
             },
           ],
         },
