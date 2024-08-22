@@ -12,6 +12,10 @@ export const OfficeUtils = {
     });
     return emailBody.value;
   },
+  async getTimeStampOfEmail(){
+    const item = Office.context.mailbox.item;
+    return item.dateTimeCreated;
+  }
 };
 
 function removeAttributes(node) {

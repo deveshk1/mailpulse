@@ -1,3 +1,4 @@
+import { PromptService } from "../service/promptService";
 import { checkIsAgreement, extractAgreedValue } from "./agreement";
 import { LLMApi } from "./common/llm";
 import { HtmlLogger } from "./common/logging";
@@ -6,7 +7,7 @@ import { checkForMismatches, detectDisagreedCaclTable } from "./disagreement";
 import MockSor from "./mock/mismatch/sor.json";
 
 const axios = require("axios");
-
+const promptSer = new PromptService();
 Office.onReady((info) => {
   if (info.host === Office.HostType.Outlook) {
     document.getElementById("sideload-msg").style.display = "none";
@@ -28,13 +29,20 @@ Office.onReady((info) => {
 export async function init() {
   HtmlLogger.startTimer();
 
-  const currentEmailSender = await OfficeUtils.getCurrentEmailSender();
+  const currentEmailSender = await OfficeUtils.getCurrentEmailSender(); 
+  OfficeUtils.get
+  console.log(currentEmailSender)
   const currentEmailStr =
     `<b>From:</b><a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
+
   const ragHelper = new EmailCleaner();
 
   const cleanedHtml = ragHelper.cleanHtml(currentEmailStr);
+
+console.log(cleanedHtml);
+
   const emailsArr = ragHelper.splitEmailThread(cleanedHtml).map(ragHelper.extractEmailDetails);
+  console.log(emailsArr)
 
   const allTables = emailsArr.map((e) => {
     let table = ragHelper.parseTable(e.emailHtml);
@@ -64,7 +72,9 @@ export async function init() {
     HtmlLogger.setOutput(outputHtml);
   } else {
     const dataInCurrentEmail = allTables[0]?.data;
-    const conflictTable = await detectDisagreedCaclTable(emailsArr[0]);
+    console.log(emailsArr[0]);
+    // const conflictTable = await detectDisagreedCaclTable(emailsArr[0]);
+    const conflictTable = promptSer.detectDisagreedCaclTablePrompt(emailsArr[0]);
     const conflictTableData = ragHelper.parseTable(conflictTable, null, 2);
     const mismatches = await checkForMismatches(conflictTableData, MockSor);
     const mismatchJson = HtmlLogger.extractJSONFromMarkdown(mismatches)[0];
