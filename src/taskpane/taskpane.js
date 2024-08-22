@@ -30,7 +30,7 @@ export async function init() {
   HtmlLogger.startTimer();
 
   const currentEmailSender = await OfficeUtils.getCurrentEmailSender(); 
-  OfficeUtils.get
+ 
   console.log(currentEmailSender)
   const currentEmailStr =
     `<b>From:</b><a>${currentEmailSender}</a>` + (await OfficeUtils.getCurrentEmailAsHtmlString());
