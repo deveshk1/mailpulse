@@ -9,8 +9,8 @@ export const HtmlLogger = {
   },
 
   extractJSONFromMarkdown(markdown) {
-    if(!markdown.includes("`")){
-      return JSON.parse(markdown)
+    if (!markdown.includes("`")) {
+      return JSON.parse(markdown);
     }
     const regex = /```json([\s\S]*?)```/g;
     let match;
@@ -76,6 +76,9 @@ export const HtmlLogger = {
   },
 
   log(str, append) {
+    if (typeof str == "object") {
+      str = JSON.stringify(str, null, 2);
+    }
     const consoleElement = document.getElementById("console");
 
     if (consoleElement) {
