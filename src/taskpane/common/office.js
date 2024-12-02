@@ -2,19 +2,20 @@ import { HtmlLogger } from "./logging";
 
 export const OfficeUtils = {
   async getCurrentEmailSender() {
-    const item = Office.context.mailbox.item;
-    return item.from.emailAddress;
+    return "shiveshnavin@gmail.com";
   },
   async getCurrentEmailAsHtmlString() {
-    const item = Office.context.mailbox.item;
-    const emailBody = await new Promise((resolve, reject) => {
-      item.body.getAsync(Office.CoercionType.Html, resolve);
-    });
-    return emailBody.value;
+    return `Hello,
+
+We agree to pay USD 66,373.43 for VD 15 August 2024.
+
+Kindly let us know if you have queries.
+
+Regards,
+SG`;
   },
   async getTimeStampOfEmail() {
-    const item = Office.context.mailbox.item;
-    return item.dateTimeCreated;
+    return Date.now();
   },
 };
 

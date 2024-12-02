@@ -8,22 +8,23 @@ import MockSor from "./mock/mismatch/sor.json";
 
 const axios = require("axios");
 const promptSer = new PromptService();
-Office.onReady((info) => {
-  if (info.host === Office.HostType.Outlook) {
-    document.getElementById("sideload-msg").style.display = "none";
-    document.getElementById("app-body").style.display = "flex";
-    var isRun = false;
-    function onClick() {
-      if (isRun) {
-        return;
-      }
-      isRun = true;
-      init().finally(() => {
-        isRun = false;
-      });
+
+window.addEventListener("load", function () {
+  console.log("All assets are loaded");
+  console.log("READY");
+  // document.getElementById("sideload-msg").style.display = "none";
+  // document.getElementById("app-body").style.display = "flex";
+  var isRun = false;
+  function onClick() {
+    if (isRun) {
+      return;
     }
-    document.getElementById("run").onclick = onClick;
+    isRun = true;
+    init().finally(() => {
+      isRun = false;
+    });
   }
+  document.getElementById("run").onclick = onClick;
 });
 
 export async function init() {
